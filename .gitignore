@@ -1,4 +1,7 @@
 rbx1/
-CMakeLists.txt
+rbx2/
 turtlebot/
 usb_cam/
+*.py[cod]
+*.egg
+*.egg-info
