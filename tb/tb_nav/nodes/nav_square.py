@@ -16,6 +16,9 @@ class NavSquare:
         # Set rospy to execute a shutdown function when terminating the script
         rospy.on_shutdown(self.shutdown)
 
+        self.robot_type = rospy.get_param("~robot_type", "turtlebot2")
+        rospy.loginfo("robot type is " + self.robot_type)
+
         # How fast will we update the robot's movement
         rate = 20
 
@@ -31,7 +34,11 @@ class NavSquare:
         angular_tolerance = radians(rospy.get_param("~angular_tolerance", 2))  # degrees to radians
 
         # Publisher to control the robot's speed
-        self.cmd_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
+        # Tip: You may need to change cmd_vel_mux/input/navi to /cmd_vel if you're not uising Turtlebot2
+        if self.robot_type == "turtlebot2":
+            self.cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=5)
+        else:
+            self.cmd_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
 
         # The base frame is base footprint for the TurtleBot
         self.base_frame = rospy.get_param("~base_frame", '/base_footprint')

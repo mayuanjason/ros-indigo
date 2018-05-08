@@ -3,7 +3,8 @@
 import rospy
 import cv2
 import cv2.cv as cv
-
+from tb_vision.test_vision import *
+# from tb_vision.face_detector import FaceDetector
 
 class Test(object):
 

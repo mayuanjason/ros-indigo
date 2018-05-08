@@ -14,13 +14,20 @@ class OutAndBack:
         # Set rospy to execute a shutdown function when exiting
         rospy.on_shutdown(self.shutdown)
 
+        self.robot_type = rospy.get_param("~robot_type", "turtlebot2")
+        rospy.loginfo("robot type is " + self.robot_type)
+
         # Publisher to control the robot's speed
-        self.cmd_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+        # Tip: You may need to change cmd_vel_mux/input/navi to /cmd_vel if you're not uising Turtlebot2
+        if self.robot_type == "turtlebot2":
+            self.cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=1)
+        else:
+            self.cmd_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
         # How fast will we update the robot's movement?
         rate = 50
 
-        # Set the equivalent ROS rate variable
+        # Turtlebot will stop if we don't keep telling it to move. How often should we tell it to move? 50HZ
         r = rospy.Rate(rate)
 
         # Set the forward linear speed to 0.2 meters per second

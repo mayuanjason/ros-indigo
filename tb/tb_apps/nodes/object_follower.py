@@ -61,11 +61,18 @@ class ObjectFollower():
         # Slow down factor when stopping
         self.slow_down_factor = rospy.get_param("~slow_down_factor", 0.8)
 
+        self.robot_type = rospy.get_param("~robot_type", "turtlebot2")
+        rospy.loginfo("robot type is " + self.robot_type)
+
         # Initialize the global ROI
         self.roi = RegionOfInterest()
 
         # Publisher to control the robot's movement
-        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
+        # Tip: You may need to change cmd_vel_mux/input/navi to /cmd_vel if you're not uising Turtlebot2
+        if self.robot_type == "turtlebot2":
+            self.cmd_vel_pub = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=5)
+        else:
+            self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
 
         # Initialize the movement command
         self.move_cmd = Twist()

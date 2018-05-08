@@ -31,8 +31,15 @@ class ObjectTracker():
         # the ROI needs to be in the x-direction before we react
         self.x_threshold = rospy.get_param("~x_threshold", 0.1)
 
+        self.robot_type = rospy.get_param("~robot_type", "turtlebot2")
+        rospy.loginfo("robot type is " + self.robot_type)
+
         # Publisher to control the robot's movement
-        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
+        # Tip: You may need to change cmd_vel_mux/input/navi to /cmd_vel if you're not uising Turtlebot2
+        if self.robot_type == "turtlebot2":
+            self.cmd_vel_pub = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=5)
+        else:
+            self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
 
         # Initialize the movement command
         self .move_cmd = Twist()

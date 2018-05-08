@@ -64,6 +64,13 @@ class ROS2OpenCV2(object):
         # Create the main display window
         self.cv_window_name = self.node_name
         cv2.namedWindow(self.cv_window_name, cv2.WINDOW_NORMAL)
+        cv2.moveWindow(self.cv_window_name, 25, 75)
+
+        # Create the depth display window
+        self.cv_depth_window_name = "Depth Image"
+        cv2.namedWindow(self.cv_depth_window_name, cv2.WINDOW_NORMAL)
+        cv2.moveWindow("Depth Image", 25, 350)
+
         if self.resize_window_width > 0 and self.resize_window_height > 0:
             cv2.resizeWindow(self.cv_window_name, self.resize_window_width, self.resize_window_height)
 
@@ -244,6 +251,9 @@ class ROS2OpenCV2(object):
         # Make global copies
         self.depth_image = depth_image.copy()
         self.processed_depth_image = processed_depth_image.copy()
+
+        # Update the image display
+        cv2.imshow(self.cv_depth_window_name, self.processed_depth_image)
 
     def convert_image(self, ros_image):
         #  Use cv_bridge() to convert the ROS image to OpenCV format

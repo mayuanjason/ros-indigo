@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-from roslib import message
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import PointCloud2
 from geometry_msgs import Twist
@@ -72,7 +71,55 @@ class Follower():
         rospy.loginfo("Ready to follow!")
 
     def set_cmd_vel(self, msg):
-        pass
+        # Initialize the centroid coordinates point count
+        x = y = z = n = 0
+
+        # Read in the x, y, z coordinates of all points in the cloud
+        for point in point_cloud2.read_points(msg, skip_nans=True):
+            pt_x = point[0]
+            pt_y = point[1]
+            pt_z = point[2]
+
+            # Keep only those points within our designate boundaries and sum them up
+            if self.min_y < -pt_y and -pt_y < self.max_y and self.min_x < pt_x and pt_x < self.max_x and pt_z < self.max_z:
+                x += pt_x
+                y += pt_y
+                z += pt_z
+                n += 1
+
+        # If we have points, compute the centroid coordinates
+        if n:
+            x /= n
+            y /= n
+            z /= n
+
+            # Check our movement thresholds
+            if (abs(z - self.goal_z) > self.z_threshold):
+                # Compute the linear component of the movement
+                linear_speed = (z - self.goal_z) * self.z_scale
+
+                # Make sure we meet our min/max specifications
+                self.move_cmd.linear.x = copysign(max(self.min_linear_speed, min(self.max_linear_speed, abs(linear_speed))), linear_speed)
+            else:
+                self.move_cmd.linear.x *= self.slow_down_factor
+
+            if (abs(x) > self.x_threshold):
+                # Compute the angular component of the movement
+                angular_speed = -x * self.x_scale
+
+                # Make sure we meet our min/max specifications
+                self.move_cmd.angular.z = copysign(max(self.min_angular_speed, min(self.max_angular_speed, abs(angular_speed))), angular_speed)
+            else:
+                # Stop the rotation smoothly
+                self.move_cmd.angular.z *= self.slow_down_factor
+
+        else:
+            # Stop the robot smoothly
+            self.move_cmd.linear.x *= self.slow_down_factor
+            self.move_cmd.angular.z *= self.slow_down_factor
+
+        # Publish the movement command
+        self.cmd_vel_pub.publish(self.move_cmd)
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")
